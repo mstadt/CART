@@ -103,7 +103,45 @@ ylabel('Tumor')
 set(gca,'fontsize',f.gca)
 grid on
 
-% tumor volume and CART cells in blood
+%% tumor volume and CART cells in blood
+% get extracted data from Ruiz-Martinez Fig 2b
+dat = load('./data/fig2b_data.mat');
+figure(2);
+ms = 15;
+cmap2 = parula(6);
+c1 = cmap2(2,:);
+c2 = cmap2(5,:);
+clf;
+nr = 1; nc = 2;
+% Plot data
+subplot(nr,nc,1)
+hold on
+plot(dat.datTV_veh(:,1), dat.datTV_veh(:,2),...
+                'linestyle','none',...
+                'marker', 'o', 'markersize', ms,...
+                'color', c1,'markerfacecolor', c1)
+plot(dat.datTV_treat(:,1), dat.datTV_treat(:,2),...
+                'linestyle','none',...
+                'marker', 'o', 'markersize', ms,...
+                'color', c2,'markerfacecolor', c2)
+xlabel('Time (day)')
+ylabel('Tumor volume (mm^3)')
+set(gca,'fontsize',f.gca)
+grid on
+subplot(nr,nc,2)
+hold on
+plot(dat.datCART_veh(:,1), dat.datCART_veh(:,2),...
+                'linestyle','none',...
+                'marker', 'o', 'markersize', ms,...
+                'color', c1,'markerfacecolor', c1)
+plot(dat.datCART_treat(:,1), dat.datCART_treat(:,2),...
+                'linestyle','none',...
+                'marker', 'o', 'markersize', ms,...
+                'color', c2,'markerfacecolor', c2)
+xlabel('Time (day)')
+ylabel('CAR-T Cells in Blood (#/\muL)')
+set(gca,'fontsize',f.gca)
+grid on
 
 
 
