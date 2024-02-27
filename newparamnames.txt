@@ -1,0 +1,9 @@
+MV = params(1);
+K_on_CAR = params(2);
+K_off_CAR = params(3);
+Ag_CAR = params(4);
+Ag_tumor = params(5);
+Kkill_max = params(6);
+KC50_CART = params(7);
+DT_tumor = params(8);
+DT_CART = params(9);
