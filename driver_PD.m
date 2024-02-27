@@ -63,3 +63,14 @@ xlabel('t')
 ylabel('Ne')
 set(gca,'fontsize',f.gca)
 grid on
+
+%% save simulations options
+save_sim = input('Do you want to save the simulation? (0 - no/1 - yes) ');
+if save_sim
+    notes = input('notes: ');
+    fname = strcat('./simPD/', date, '_driver_PD', ...
+                    '_notes-', notes, ...
+                    '.mat');
+    save(fname)
+    fprintf('results saved to: \n %s \n', fname)
+end
