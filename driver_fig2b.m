@@ -10,7 +10,7 @@ p = set_params('PKPD_preclin');
 %% set initial condition
 CARTe_PB0 = 0; % CARTe in blood
 CARTm_PB0 = 0; % CARTm in blood
-CARTe_T0  = 1e-100; % CARTe in tissue, seems to need to be nonzero to prevent numerical issues....
+CARTe_T0  = 0; % CARTe in tissue, seems to need to be nonzero to prevent numerical issues....
 CARTm_T0  = 0; % CARTm in tissue
 Cplx0     = 0; % CAR-Target Complexes
 Tumor0    = 1e5; % tumor size
@@ -19,7 +19,7 @@ IC = [CARTe_PB0;CARTm_PB0;CARTe_T0;CARTm_T0;Cplx0;Tumor0];
 
 %% time span
 t0 = 0;
-tf = 100;
+tf = 50;
 tspan = [t0,tf];
 
 %% CART dose
@@ -176,6 +176,7 @@ grid on
 hold off
 
 % CART in blood
+TransC = 1; %0.002; % from model code
 subplot(nr,nc,2)
 hold on
 % vehicle
@@ -185,7 +186,7 @@ plot(dat.datCART_veh(:,1), dat.datCART_veh(:,2),...
                 'color', c1,'markerfacecolor', c1, ...
                 'HandleVisibility', 'off')
 
-CART_PB_tot = (y_veh(:,1) + y_veh(:,2))/(p.Vb * 1000); % # cell/muL
+CART_PB_tot = TransC*(y_veh(:,1)); % # cell/muL
 plot(t_veh,CART_PB_tot,'linewidth',lw,'color',c1)
 % treatment
 plot(dat.datCART_treat(:,1), dat.datCART_treat(:,2),...
@@ -193,14 +194,33 @@ plot(dat.datCART_treat(:,1), dat.datCART_treat(:,2),...
                 'marker', 'o', 'markersize', ms,...
                 'color', c2,'markerfacecolor', c2, ...
                 'HandleVisibility', 'off')
-CART_PB_tot = y_treat(:,1)/(p.Vb * 1000); %(y_treat(:,1) + y_treat(:,2))/(p.Vb * 1000); % # cell/muL
+CART_PB_tot = TransC*(y_treat(:,1)); %(y_treat(:,1) + y_treat(:,2))/(p.Vb * 1000); % # cell/muL
 plot(t_treat,CART_PB_tot,'linewidth',lw,'color',c2)
 legend(labs)
 xlabel('Time (day)')
 ylabel('CAR-T Cells in Blood (#/\muL)')
 set(gca,'fontsize',f.gca)
+xlim([0,40])
 grid on
 hold off
+
+%% Plot dosing
+figure(3)
+ind = find(t_treat > 240/24, 1, 'first');
+
+subplot(1,2,1)
+plot(t_treat(1:ind) * 24, y_treat(1:ind, 1) * p.Vb,'linewidth',3, 'color',c2)
+xlabel('t (hrs)')
+ylabel('CARTe_{PB} (number of cells)')
+set(gca,'fontsize',f.gca)
+grid on
+
+subplot(1,2,2)
+plot(t_treat(1:ind) * 24, y_treat(1:ind, 3) * p.Vt,'linewidth',3, 'color',c2)
+xlabel('t (hrs)')
+ylabel('CARTe_{T} (number of cells)')
+set(gca,'fontsize',f.gca)
+grid on
 
 
 
