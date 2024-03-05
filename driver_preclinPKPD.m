@@ -1,4 +1,4 @@
-% Run simulation of preclinical PKPD model
+% Run simulation of preclinical PKPD model without any drug
 clear all;
 
 %% set parameters

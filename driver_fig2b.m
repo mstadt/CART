@@ -1,4 +1,4 @@
-% Run simulation of preclinical PKPD model
+% Run simulation of preclinical PKPD model with and without drugs
 clear all;
 
 %% set parameters
@@ -193,7 +193,7 @@ plot(dat.datCART_treat(:,1), dat.datCART_treat(:,2),...
                 'marker', 'o', 'markersize', ms,...
                 'color', c2,'markerfacecolor', c2, ...
                 'HandleVisibility', 'off')
-CART_PB_tot = y_treat(:,1)/(p.Vb * 1000) %(y_treat(:,1) + y_treat(:,2))/(p.Vb * 1000); % # cell/muL
+CART_PB_tot = y_treat(:,1)/(p.Vb * 1000); %(y_treat(:,1) + y_treat(:,2))/(p.Vb * 1000); % # cell/muL
 plot(t_treat,CART_PB_tot,'linewidth',lw,'color',c2)
 legend(labs)
 xlabel('Time (day)')
