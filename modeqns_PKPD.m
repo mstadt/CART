@@ -47,11 +47,24 @@ dydt(1) = (doseCART - K12*Vb*CARTe_PB + K21*Vt*CARTe_T)./Vb - Kel_e*CARTe_PB;
 dydt(2) = (-K12*Vb*CARTm_PB + K21*Vt*CARTm_T)./Vb  - Kel_m*CARTm_PB;
 
 %% Tissue compartment (bone marrow or solid tumor)
-CplxCART = Cplx ./ (CARTe_T + CARTm_T);
-Kexp = (Kexp_max * CplxCART) ./ (EC50_exp + CplxCART);
+if (CARTe_T + CARTm_T) > 0
+    CplxCART = Cplx ./ (CARTe_T + CARTm_T);
+    % CAR-T cell expansion
+    Kexp = (Kexp_max * CplxCART) ./ (EC50_exp + CplxCART);
+else
+    Kexp = 0;
+end
 % d(CARTe_T)/dt
-dydt(3) = (K12*Vb*CARTe_PB - K21*Vt*CARTe_T)./Vt + Kexp*CARTe_T - Rm*CARTe_T;
+% if t > 40
+%     disp(t)
+%     disp(CARTe_T)
+%     disp(Rm*CARTe_T)
+% end
 
+dydt(3) = (K12*Vb*CARTe_PB - K21*Vt*CARTe_T)./Vt + Kexp*CARTe_T - Rm*CARTe_T;
+if t > 40
+    disp(dydt(3))
+end
 % d(CARTm_T)/dt
 dydt(4) = (K12*Vb*CARTm_PB + K21*Vt*CARTm_T)./Vt + Rm*CARTe_T;
 
