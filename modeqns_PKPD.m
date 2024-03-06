@@ -8,8 +8,6 @@ CARTe_T  = y(3); % CARTe in tissue
 CARTm_T  = y(4); % CARTm in tissue
 Cplx     = y(5); % CAR-Target complexes
 Tumor    = y(6); % tumor size
-M        = y(7); % serum M-protein (biomarker)
-sBCMA    = y(8); % soluble BMCA (biomarker)
 
 %% set parameter names
 K12 = params(1);
@@ -28,13 +26,6 @@ KC50_Kill = params(13);
 Kon_CAR = params(14);
 Koff_CAR = params(15);
 Kg_tumor = params(16);
-Pm = params(17);
-gamma_m = params(18);
-Km = params(19);
-Pb = params(20);
-gamma_b = params(21);
-Kb = params(22);
-Tumor0 = params(23);
 
 %% get variable inputs
 doseCART = 0; % default no treatment
@@ -81,16 +72,6 @@ Kkill = (Kkill_max * CplxTumor) / (KC50_Kill + CplxTumor);
 
 % d(Tumor)/dt
 dydt(6) = Kg_tumor * Tumor - Kkill * CARTe_T * Tumor;
-
-%% M
-% d(M)/dt
-dydt(7) = 0; %Pm * (Tumor/Tumor0)^gamma_m - Km * M; % from ex code
-%dydt(7) = Pm*Tumor0*(Tumor/Tumor0)^gamma_m - Km*M;
-
-%% sBCMA
-% d(sBCMA)/dt
-%dydt(8) = Pb*Tumor0*(Tumor/Tumor0)^gamma_b - Kb*sBCMA;
-dydt(8) = 0; %Pb*(Tumor/Tumor0)^gamma_b - Kb * sBCMA; % from ex code
 
 
 end % end modeqns
