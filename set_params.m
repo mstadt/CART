@@ -44,6 +44,12 @@ elseif strcmp(mod_type, 'PKPD_clin')
     p.Kon_CAR     = 7.1e4 * (60*60*24)/(6.023e23); % table 1 (convert to 1/#/L/day)
     p.Koff_CAR    = 2.39e-2*(60*60*24);  % table 1 (convert to 1/day)
     p.Kg_tumor    = 0.008;  %0.0888 # first order growth rate
+    p.Pm          = 12.1*2.5E9; % g/cell/day * 1e-12 (from code)
+    p.gamma_m     = 0.215; % Tab 1
+    p.Km          = 0.117; % from code (ddt_M)
+    p.Pb          = 0.7*0.5; % k*B0
+    p.gamma_b     = 1; % Tab 1
+    p.Kb          = 0.7; % from code (note -- commented out)
 else
     fprintf('what is this mod_type: %s ?\n', mod_type)
     error('mod_type not supported')

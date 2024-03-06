@@ -1,10 +1,6 @@
 % Run simulation of clinical PKPD model
 clear all;
 
-%% set parameters
-p = set_params('PKPD_clin');
-[params, ~] = pars2vector(p, 0);
-
 %% set initial condition
 CARTe_PB0 = 0; % CARTe in blood
 CARTm_PB0 = 0; % CARTm in blood
@@ -12,8 +8,18 @@ CARTe_T0  = 1e-100; % CARTe in tissue, seems to need to be nonzero to prevent nu
 CARTm_T0  = 0; % CARTm in tissue
 Cplx0     = 0; % CAR-Target Complexes
 Tumor0    = 1e5; % tumor size
+M0        = 12.1*2.5E9/0.117; % 
+sBCMA0    = 0.5;
 
-IC = [CARTe_PB0;CARTm_PB0;CARTe_T0;CARTm_T0;Cplx0;Tumor0];
+IC = [CARTe_PB0;CARTm_PB0;CARTe_T0;CARTm_T0;Cplx0;Tumor0;M0;sBCMA0];
+
+%% set parameters
+p = set_params('PKPD_clin');
+% change params here
+p.Tumor0 = Tumor0;
+
+[params, ~] = pars2vector(p, 0);
+
 
 %% time span
 t0 = 0;
@@ -52,7 +58,7 @@ ymax = 1;
 
 % variables
 figure(1)
-nr = 3;
+nr = 4;
 nc = 2;
 clf;
 subplot(nr,nc,1)
@@ -102,6 +108,19 @@ ylabel('Tumor')
 set(gca,'fontsize',f.gca)
 grid on
 
+subplot(nr,nc,7)
+plot(t,(y(:,7)-M0) * 100/ M0,'linewidth',lw,'color',c1)
+xlabel('t')
+ylabel('M change')
+set(gca,'fontsize',f.gca)
+grid on
+
+subplot(nr,nc,8)
+plot(t,(y(:,8) - sBCMA0)*100/sBCMA0,'linewidth',lw,'color',c1)
+xlabel('t')
+ylabel('sBMCA change')
+set(gca,'fontsize',f.gca)
+grid on
 
 
 %% save simulations options
