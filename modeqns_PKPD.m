@@ -84,11 +84,13 @@ dydt(6) = Kg_tumor * Tumor - Kkill * CARTe_T * Tumor;
 
 %% M
 % d(M)/dt
-dydt(7) = Pm*Tumor0 * (Tumor/Tumor0)^gamma_m - Km * M;
+dydt(7) = 0; %Pm * (Tumor/Tumor0)^gamma_m - Km * M; % from ex code
+%dydt(7) = Pm*Tumor0*(Tumor/Tumor0)^gamma_m - Km*M;
 
 %% sBCMA
 % d(sBCMA)/dt
-dydt(8) = Pb * Tumor0 * (Tumor/Tumor0)^gamma_b - Kb * sBCMA;
+%dydt(8) = Pb*Tumor0*(Tumor/Tumor0)^gamma_b - Kb*sBCMA;
+dydt(8) = 0; %Pb*(Tumor/Tumor0)^gamma_b - Kb * sBCMA; % from ex code
 
 
 end % end modeqns
