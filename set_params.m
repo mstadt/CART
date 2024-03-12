@@ -45,12 +45,14 @@ elseif strcmp(mod_type, 'PKPD_clin')
     p.Koff_CAR    = 2.39e-2*(60*60*24);  % table 1 (convert to 1/day)
     p.Kg_tumor    = 0.008;  %0.0888 # first order growth rate
 elseif strcmp(mod_type,'biomarkers')
-    p.Pm          = 12.1*2.5E9; % g/cell/day * 1e-12 (from code)
+    M0 = 12.1*2.5E9/0.117;
+    sBCMA0 = 0.5;
+    p.Pm          = 12.1*2.5E9/M0; % g/cell/day * 1e-12 (from code)
     p.gamma_m     = 0.215; % Tab 1
-    p.Km          = 0.117; % from code (ddt_M)
-    p.Pb          = 0.7*0.5; % k*B0
+    p.Km          = 0.117; %0.117/M0; % from code (ddt_M)
+    p.Pb          = 0.7*0.5/sBCMA0; % k*B0
     p.gamma_b     = 1; % Tab 1
-    p.Kb          = 0.7; % from code (note -- commented out)
+    p.Kb          = 0.7/sBCMA0; % from code (note -- commented out)
 else
     fprintf('what is this mod_type: %s ?\n', mod_type)
     error('mod_type not supported')

@@ -28,23 +28,23 @@ Koff_CAR = params(15);
 Kg_tumor = params(16);
 
 %% get variable inputs
-doseCART = 0; % default no treatment
-for ii = 1:2:length(varargin)
-    temp = varargin{ii+1};
-    if strcmp(varargin{ii},'doseCART')
-        doseCART = temp;
-    end
-end
+% doseCART = 0; % default no treatment
+% for ii = 1:2:length(varargin)
+%     temp = varargin{ii+1};
+%     if strcmp(varargin{ii},'doseCART')
+%         doseCART = temp;
+%     end
+% end
 
 %% model equations
 dydt = zeros(length(y),1);
 
 %% Peripheral blood compartment
 % d(CARTe_PB)/dt
-dydt(1) = (doseCART - K12*Vb*CARTe_PB + K21*Vt*CARTe_T)./Vb - Kel_e*CARTe_PB;
+dydt(1) = (-K12*Vb*CARTe_PB + K21*Vt*CARTe_T)./Vb - Kel_e*CARTe_PB;
 
 % d(CARTm_PB)/dt
-dydt(2) = (-K12*Vb*CARTm_PB + K21*Vt*CARTm_T)./Vb  - Kel_m*CARTm_PB;
+dydt(2) = (K21*Vt*CARTm_T-K12*Vb*CARTm_PB)./Vb  - Kel_m*CARTm_PB;
 
 %% Tissue compartment (bone marrow or solid tumor)
 if (CARTe_T + CARTm_T) > 0
@@ -55,10 +55,11 @@ else
     Kexp = 0;
 end
 
+% d(CARTe_T)/dt
 dydt(3) = (K12*Vb*CARTe_PB - K21*Vt*CARTe_T)./Vt + Kexp*CARTe_T - Rm*CARTe_T;
 
 % d(CARTm_T)/dt
-dydt(4) = (K12*Vb*CARTm_PB + K21*Vt*CARTm_T)./Vt + Rm*CARTe_T;
+dydt(4) = (K12*Vb*CARTm_PB - K21*Vt*CARTm_T)./Vt + Rm*CARTe_T;
 
 % Cplx
 f_CART = (CARTe_T + CARTm_T) * Ag_CAR - Cplx;

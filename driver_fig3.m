@@ -11,8 +11,6 @@ CARTe_T0  = 1e-6; %0; %1e-100; % CARTe in tissue, seems to need to be nonzero to
 CARTm_T0  = 0; % CARTm in tissue
 Cplx0     = 0; % CAR-Target Complexes
 Tumor0    = 1e5; % tumor size
-M0        = 12.1*2.5E9/0.117; % 
-sBCMA0    = 0.5;
 
 IC = [CARTe_PB0;CARTm_PB0;CARTe_T0;CARTm_T0;Cplx0;Tumor0];
 
@@ -30,7 +28,7 @@ tf = 360;
 tspan = [t0,tf];
 
 %% CART dose
-doseCART_tot = 150e6; %50e6; %50e6; %50e6; % total number of cells in dose
+doseCART_tot = 50e6 %50e6; %50e6; %50e6; %50e6; % total number of cells in dose
 dose_start = 0; % time to start dose
 dose_time_hrs = 4; % time over dose is given (hrs)
 
@@ -48,6 +46,8 @@ fprintf('treatment simulation \n')
 fprintf('sim finished \n')
 
 if do_biomarkers
+    M0        = 1; %12.1*2.5E9/0.117; % 
+    sBCMA0    = 1; %0.5;
     % biomarkers simulation
     fprintf('get biomarkers \n')
     IC_bm = [M0;sBCMA0];
@@ -277,6 +277,20 @@ clf;
 plot(t_treat,y_treat(:,6)/Tumor0,'linewidth',lw,'color',c2)
 xlabel('t')
 ylabel('Tumor/Tumor_0')
+set(gca,'fontsize',f.gca)
+grid on
+
+%% Blood transgene
+TransC=0.002; % from model code
+CARTe_PB = y_treat(:,1);
+CARTm_PB = y_treat(:,2);
+FinalCARTPB = TransC * (CARTe_PB + CARTm_PB);
+figure(5)
+clf
+plot(t_treat, FinalCARTPB, 'linewidth',lw,'color',c2)
+xlabel('t (days)')
+ylabel('Transgene copies/\mu g genomic DNA')
+xlim([0,70])
 set(gca,'fontsize',f.gca)
 grid on
 
