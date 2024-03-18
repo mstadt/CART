@@ -2,12 +2,12 @@
 clear all;
 
 %% Options
-do_biomarkers = 1;
+do_biomarkers = 0;
 
 %% set initial condition
 CARTe_PB0 = 0; % CARTe in blood
 CARTm_PB0 = 0; % CARTm in blood
-CARTe_T0  = 1e-6; %0; %1e-100; % CARTe in tissue, seems to need to be nonzero to prevent numerical issues....
+CARTe_T0  = 0; % CARTe in tissue
 CARTm_T0  = 0; % CARTm in tissue
 Cplx0     = 0; % CAR-Target Complexes
 Tumor0    = 1e5; % tumor size
@@ -29,8 +29,8 @@ tspan = [t0,tf];
 
 %% CART dose
 doseCART_tot = 50e6 %50e6; %50e6; %50e6; %50e6; % total number of cells in dose
-dose_start = 0; % time to start dose
-dose_time_hrs = 4; % time over dose is given (hrs)
+%dose_start = 0; % time to start dose
+%dose_time_hrs = 4; % time over dose is given (hrs)
 
 %% ODE settings
 options = odeset('RelTol',1.0e-12,'AbsTol',1e-12); % ode solver settings
@@ -41,8 +41,11 @@ options = odeset('RelTol',1.0e-12,'AbsTol',1e-12); % ode solver settings
 %                                     'doseCART', 0),...
 %                                     tspan, IC, options);
 fprintf('treatment simulation \n')
-[t_treat,y_treat] = run_dose_sim(doseCART_tot, dose_start,dose_time_hrs,...
-                                    params, tspan, IC, options);
+% [t_treat,y_treat] = run_dose_sim(doseCART_tot, dose_start,dose_time_hrs,...
+%                                     params, tspan, IC, options);
+IC(1) = doseCART_tot;
+[t_treat, y_treat] = ode15s(@(t,y) modeqns_PKPD(t,y,params),...
+                                    tspan, IC, options);
 fprintf('sim finished \n')
 
 if do_biomarkers
@@ -183,11 +186,11 @@ nr = 3;
 nc = 2;
 clf;
 subplot(nr,nc,1)
-plot(t_treat,y_treat(:,1),'linewidth',lw,'color',c2)
+plot(t_treat,max(1e-16,y_treat(:,1)),'linewidth',lw,'color',c2)
 xlabel('t')
 ylabel('CARTe_{PB}')
 ylim([0, max(ymax, max(y_treat(:,1)))])
-set(gca,'fontsize',f.gca)
+set(gca,'fontsize',f.gca,'YScale','log')
 grid on
 
 subplot(nr,nc,2)
@@ -195,7 +198,7 @@ plot(t_treat,y_treat(:,2),'linewidth',lw,'color',c2)
 xlabel('t')
 ylabel('CARTm_{PB}')
 ylim([0, max(ymax, max(y_treat(:,2)))])
-set(gca,'fontsize',f.gca)
+set(gca,'fontsize',f.gca,'YScale','log')
 grid on
 
 subplot(nr,nc,3)
@@ -203,7 +206,7 @@ plot(t_treat,y_treat(:,3),'linewidth',lw,'color',c2)
 xlabel('t')
 ylabel('CARTe_{T}')
 ylim([0, max(ymax, max(y_treat(:,3)))])
-set(gca,'fontsize',f.gca)
+set(gca,'fontsize',f.gca,'YScale','log')
 grid on
 
 subplot(nr,nc,4)
@@ -211,7 +214,7 @@ plot(t_treat,y_treat(:,4),'linewidth',lw,'color',c2)
 xlabel('t')
 ylabel('CARTm_{T}')
 ylim([0, max(ymax, max(y_treat(:,4)))])
-set(gca,'fontsize',f.gca)
+set(gca,'fontsize',f.gca,'YScale','log')
 grid on
 
 subplot(nr,nc,5)
@@ -286,11 +289,21 @@ CARTe_PB = y_treat(:,1);
 CARTm_PB = y_treat(:,2);
 FinalCARTPB = TransC * (CARTe_PB + CARTm_PB);
 figure(5)
-clf
-plot(t_treat, FinalCARTPB, 'linewidth',lw,'color',c2)
+%clf
+plot(t_treat, FinalCARTPB, 'linewidth',lw)
+%plot(t_treat, FinalCARTPB, 'linewidth',lw,'color',c2)
 xlabel('t (days)')
 ylabel('Transgene copies/\mu g genomic DNA')
 xlim([0,70])
+set(gca,'fontsize',f.gca, 'Yscale', 'log')
+grid on
+
+% Cplx
+figure(6)
+clf;
+plot(t_treat, y_treat(:,5),'linewidth',lw,'color',c2)
+xlabel('t (days)')
+ylabel('Cplx')
 set(gca,'fontsize',f.gca)
 grid on
 

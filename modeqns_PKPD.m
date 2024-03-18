@@ -80,7 +80,7 @@ CplxTumor = Cplx./Tumor;
 Kkill = (Kkill_max * CplxTumor) / (KC50_Kill + CplxTumor);
 
 % d(Tumor)/dt
-dydt(6) = Kg_tumor * Tumor - Kkill * CARTe_T * Tumor;
+dydt(6) = Kg_tumor * Tumor - Kkill * Tumor;
 
 
 end % end modeqns
