@@ -3,7 +3,14 @@ clear all;
 
 %% set parameters
 p = set_params('PKPD_preclin');
+pclin = set_params('PKPD_clin');
 % change params here (option)
+p = pclin;
+p.Kg_tumor = 0.1; %0.2; %0.088;
+% p.K12 = pclin.K12;
+% p.Kexp_max = pclin.Kexp_max;
+% p.EC50_exp = pclin.EC50_exp;
+
 
 [params, ~] = pars2vector(p, 0);
 
@@ -19,13 +26,13 @@ IC = [CARTe_PB0;CARTm_PB0;CARTe_T0;CARTm_T0;Cplx0;Tumor0];
 
 %% time span
 t0 = 0;
-tf = 50;
-tspan = [t0,tf];
+tf_veh = 35;
+tf_treat = 70;
+tspan_veh = [t0,tf_veh];
+tspan_treat = [t0;tf_treat];
 
 %% CART dose
 doseCART_tot = 5e6; % total number of cells in dose
-dose_start = 0;
-dose_time_hrs = 4; % time in hours
 
 
 %% ODE settings
@@ -34,12 +41,14 @@ options = odeset('RelTol',1.0e-12,'AbsTol',1e-16); % ode solver settings
 %% Simulation
 fprintf('vehicle simulation \n')
 % vehicle simulation
-[t_veh, y_veh] = ode15s(@(t,y) modeqns_PKPD(t,y,params,...
-                                    'doseCART', 0),...
-                                    tspan, IC, options);
+[t_veh, y_veh] = ode15s(@(t,y) modeqns_PKPD(t,y,params),...
+                                    tspan_veh, IC, options);
 fprintf('treatment simulation \n')
-[t_treat,y_treat] = run_dose_sim(doseCART_tot, dose_start,dose_time_hrs,...
-                                    params, tspan, IC, options);
+IC(1) = doseCART_tot; % add dose
+[t_treat, y_treat] = ode15s(@(t,y) modeqns_PKPD(t,y,params),...
+                                    tspan_treat, IC, options);
+% [t_treat,y_treat] = run_dose_sim(doseCART_tot, dose_start,dose_time_hrs,...
+%                                     params, tspan_treat, IC, options);
 fprintf('sim finished \n')
 
 %% Make figures
@@ -73,7 +82,7 @@ ylabel('CARTe_{PB}')
 legend(labs)
 ymax = max([1;y_veh(:,1);y_treat(:,1)]);
 ylim([0, ymax])
-set(gca,'fontsize',f.gca)
+set(gca,'fontsize',f.gca,'Yscale','log')
 grid on
 hold off
 
@@ -86,7 +95,7 @@ ylabel('CARTm_{PB}')
 legend(labs)
 ymax = max([1;y_veh(:,2);y_treat(:,2)]);
 ylim([0, ymax])
-set(gca,'fontsize',f.gca)
+set(gca,'fontsize',f.gca,'Yscale','log')
 grid on
 hold off
 
@@ -99,7 +108,7 @@ ylabel('CARTe_{T}')
 legend(labs)
 ymax = max([1;y_veh(:,3);y_treat(:,3)]);
 ylim([0, ymax])
-set(gca,'fontsize',f.gca)
+set(gca,'fontsize',f.gca,'Yscale','log')
 grid on
 hold off
 
@@ -112,7 +121,7 @@ ylabel('CARTm_{T}')
 legend(labs)
 ymax = max([1;y_veh(:,4);y_treat(:,4)]);
 ylim([0, ymax])
-set(gca,'fontsize',f.gca)
+set(gca,'fontsize',f.gca,'Yscale','log')
 grid on
 hold off
 
@@ -176,7 +185,6 @@ grid on
 hold off
 
 % CART in blood
-TransC = 1; %0.002; % from model code
 subplot(nr,nc,2)
 hold on
 % vehicle
@@ -186,7 +194,7 @@ plot(dat.datCART_veh(:,1), dat.datCART_veh(:,2),...
                 'color', c1,'markerfacecolor', c1, ...
                 'HandleVisibility', 'off')
 
-CART_PB_tot = TransC*(y_veh(:,1)); % # cell/muL
+CART_PB_tot = (y_veh(:,1) + y_veh(:,2))/5000;%(p.Vb * 1000); % # cell/muL
 plot(t_veh,CART_PB_tot,'linewidth',lw,'color',c1)
 % treatment
 plot(dat.datCART_treat(:,1), dat.datCART_treat(:,2),...
@@ -194,7 +202,7 @@ plot(dat.datCART_treat(:,1), dat.datCART_treat(:,2),...
                 'marker', 'o', 'markersize', ms,...
                 'color', c2,'markerfacecolor', c2, ...
                 'HandleVisibility', 'off')
-CART_PB_tot = TransC*(y_treat(:,1)); %(y_treat(:,1) + y_treat(:,2))/(p.Vb * 1000); % # cell/muL
+CART_PB_tot = (y_treat(:,1) + y_treat(:,2))/5000; %(p.Vb * 1000); % # cell/muL
 plot(t_treat,CART_PB_tot,'linewidth',lw,'color',c2)
 legend(labs)
 xlabel('Time (day)')
@@ -235,62 +243,3 @@ grid on
 %     fprintf('results saved to: \n %s \n', fname)
 % end
 
-
-%--------------------------
-% functions used
-%--------------------------
-function [t,y] = run_dose_sim(doseCART_tot, dose_start,dose_time_hrs, params, tspan, IC, options)
-    doseCART = doseCART_tot/(dose_time_hrs/24);
-    if dose_start > tspan(1)
-        % start with no dose to start
-        t0 = tspan(1);
-        tf = dose_start;
-        IC1 = IC;
-        [t1,y1] = ode15s(@(t,y) modeqns_PKPD(t,y,params,...
-                                            'doseCART', 0),...
-                                            [t0,tf], IC1, options);
-        % add dose
-        IC2 = y1(end,:);
-        t0 = dose_start;
-        tf = min(dose_start + dose_time_hrs/24, tspan(2));
-        [t2,y2] = ode15s(@(t,y) modeqns_PKPD(t,y,params,...
-                                            'doseCART', doseCART),...
-                                            [t0,tf], IC2, options);
-
-        t = [t1;t2];
-        y = [y1;y2];
-        if tspan(2) > (dose_start + dose_time_hrs/24)
-            IC3 = y2(end,:);
-            t0 = t2(end);
-            tf = tspan(2);
-            [t3,y3] = ode15s(@(t,y) modeqns_PKPD(t,y,params,...
-                                            'doseCART', 0),...
-                                            [t0,tf], IC3, options);
-            t = [t;t3];
-            y = [y;y3];
-        end
-    elseif dose_start == tspan(1)
-        % start with dose
-        IC1 = IC;
-        t0 = tspan(1);
-        tf = dose_time_hrs/24;
-        [t1,y1] = ode15s(@(t,y) modeqns_PKPD(t,y,params,...
-                                            'doseCART', doseCART),...
-                                            [t0,tf], IC1, options);
-        t = t1;
-        y = y1;
-       if tspan(2) > (dose_start + dose_time_hrs/24)
-            IC2 = y1(end,:);
-            t0 = t1(end);
-            tf = tspan(2);
-            [t2,y2] = ode15s(@(t,y) modeqns_PKPD(t,y,params,...
-                                            'doseCART', 0),...
-                                            [t0,tf], IC2, options);
-            t = [t;t2];
-            y = [y;y2];
-        end
-    else
-        fprintf('dose_start: %f, tspan(1): %f \n', dose_start, tspan(1))
-        error('dose_start before simulation start')
-    end
-end
