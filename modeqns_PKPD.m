@@ -6,7 +6,7 @@ CARTe_PB = y(1); % CARTe in blood
 CARTm_PB = y(2); % CARTm in blood
 CARTe_T  = y(3); % CARTe in tissue
 CARTm_T  = y(4); % CARTm in tissue
-Cplx     = y(5); % CAR-Target complexes
+Cplx_T     = y(5); % CAR-Target complexes
 Tumor    = y(6); % tumor size
 
 %% set parameter names
@@ -47,16 +47,16 @@ CARTe_PB_deg = Kel_e*CARTe_PB; % CARTe degradation in PB
 dydt(1) = (CARTe_T2PB - CARTe_PB2T)./Vb - CARTe_PB_deg;
 
 % d(CARTm_PB)/dt
-CARTm_T2PB = K21*Vt*CARTm_T; % CARTm cell T to PB compartment
-CARTm_PB2T = K12*Vb*CARTm_PB; % CARTm cell PB to T compartment
+CARTm_T2PB = 0; %K21*Vt*CARTm_T; % CARTm cell T to PB compartment
+CARTm_PB2T = 0; %K12*Vb*CARTm_PB; % CARTm cell PB to T compartment
 CARTm_PB_deg = Kel_m*CARTm_PB; % degradation of CARTm in PB
 dydt(2) = (CARTm_T2PB - CARTm_PB2T)./Vb  - CARTm_PB_deg;
 
 %% Tissue compartment (bone marrow or solid tumor)
 if (CARTe_T + CARTm_T) > 0
-    CplxCART = Cplx ./ (CARTe_T + CARTm_T);
+    CplxPCART_T = Cplx_T / (CARTe_T + CARTm_T);  
     % CAR-T cell expansion
-    Kexp = (Kexp_max * CplxCART) ./ (EC50_exp + CplxCART);
+    Kexp = (Kexp_max * CplxPCART_T) ./ (EC50_exp + CplxPCART_T);
 else
     Kexp = 0;
 end
@@ -69,14 +69,14 @@ dydt(3) = (CARTe_PB2T - CARTe_T2PB)./Vt + CARTe_exp - CARTe2CARTm;
 % d(CARTm_T)/dt
 dydt(4) = (CARTm_PB2T - CARTm_T2PB)./Vt + CARTe2CARTm;
 
-% Cplx
-f_CART = (CARTe_T + CARTm_T) * Ag_CAR - Cplx;
-f_Ag   = Tumor * Ag_TAA - Cplx;
+% Cplx_T
+f_CART = (CARTe_T + CARTm_T) * Ag_CAR - Cplx_T;
+f_Ag   = Tumor * Ag_TAA - Cplx_T;
 % d(Cplx)/dt
-dydt(5) = Kon_CAR * f_CART * f_Ag - Koff_CAR * Cplx;
+dydt(5) = Kon_CAR * f_CART * f_Ag - Koff_CAR * Cplx_T;
 
 %% Tumor
-CplxTumor = Cplx./Tumor;
+CplxTumor = Cplx_T./Tumor;
 Kkill = (Kkill_max * CplxTumor) / (KC50_Kill + CplxTumor);
 
 % d(Tumor)/dt

@@ -25,7 +25,7 @@ elseif strcmp(mod_type, 'PKPD_preclin')
     p.Kkill_max   = 0.612; % Table 1
     p.KC50_Kill   = 2.24; % Table 1
     p.Kon_CAR     = 7.1e4 * (60*60*24)/(6.023e23); % table 1 (convert to 1/#/L/day)
-    p.Koff_CAR    = 2.39e-2*(60*60*24); % table 1 (convert to 1/day)
+    p.Koff_CAR    = 2.39e-3*(60*60*24); % table 1 (convert to 1/day)
     p.Kg_tumor    = 0.0888; % first order growth rate
 elseif strcmp(mod_type, 'PKPD_clin')
     p.K12         = 1.71; %20304, # (1/day) distribution rate from blood to bone marrow compartment
@@ -42,7 +42,7 @@ elseif strcmp(mod_type, 'PKPD_clin')
     p.Kkill_max   = 0.343; % 0.612, # Table 1
     p.KC50_Kill   = 2.24; % Table 1
     p.Kon_CAR     = 7.1e4 * (60*60*24)/(6.023e23); % table 1 (convert to 1/#/L/day)
-    p.Koff_CAR    = 2.39e-2*(60*60*24);  % table 1 (convert to 1/day)
+    p.Koff_CAR    = 2.39e-3*(60*60*24);  % table 1 (convert to 1/day)
     p.Kg_tumor    = 0.008;  %0.0888 # first order growth rate
 elseif strcmp(mod_type,'biomarkers')
     M0 = 12.1*2.5E9/0.117;

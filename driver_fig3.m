@@ -17,7 +17,7 @@ IC = [CARTe_PB0;CARTm_PB0;CARTe_T0;CARTm_T0;Cplx0;Tumor0];
 %% set parameters
 p = set_params('PKPD_clin');
 % change params here
-
+p.Rm = 2e-3;
 
 [params, ~] = pars2vector(p, 0);
 
@@ -28,7 +28,7 @@ tf = 360;
 tspan = [t0,tf];
 
 %% CART dose
-doseCART_tot = 50e6 %50e6; %50e6; %50e6; %50e6; % total number of cells in dose
+doseCART_tot = 800e6; %500e6; %; % total number of cells in dose
 %dose_start = 0; % time to start dose
 %dose_time_hrs = 4; % time over dose is given (hrs)
 
@@ -37,12 +37,9 @@ options = odeset('RelTol',1.0e-12,'AbsTol',1e-12); % ode solver settings
 
 %% Simulation
 % fprintf('vehicle simulation \n')
-% [t_veh,y_veh] = ode15s(@(t,y) modeqns_PKPD(t,y,params,...
-%                                     'doseCART', 0),...
+% [t_veh,y_veh] = ode15s(@(t,y) modeqns_PKPD(t,y,params),...
 %                                     tspan, IC, options);
 fprintf('treatment simulation \n')
-% [t_treat,y_treat] = run_dose_sim(doseCART_tot, dose_start,dose_time_hrs,...
-%                                     params, tspan, IC, options);
 IC(1) = doseCART_tot;
 [t_treat, y_treat] = ode15s(@(t,y) modeqns_PKPD(t,y,params),...
                                     tspan, IC, options);
@@ -277,9 +274,12 @@ end
 %% tumor
 figure(4)
 clf;
+hold on
+%plot(t_veh,y_veh(:,6)/Tumor0,'linewidth',lw,'color',c1)
 plot(t_treat,y_treat(:,6)/Tumor0,'linewidth',lw,'color',c2)
 xlabel('t')
 ylabel('Tumor/Tumor_0')
+%legend('Vehicle', 'Treatment')
 set(gca,'fontsize',f.gca)
 grid on
 
@@ -295,10 +295,11 @@ plot(t_treat, FinalCARTPB, 'linewidth',lw)
 xlabel('t (days)')
 ylabel('Transgene copies/\mu g genomic DNA')
 xlim([0,70])
+ylim([10^1, 10^7])
 set(gca,'fontsize',f.gca, 'Yscale', 'log')
 grid on
 
-% Cplx
+%% Cplx
 figure(6)
 clf;
 plot(t_treat, y_treat(:,5),'linewidth',lw,'color',c2)
@@ -317,3 +318,7 @@ grid on
 %     save(fname)
 %     fprintf('results saved to: \n %s \n', fname)
 % end
+
+y=y_treat;
+t=t_treat;
+

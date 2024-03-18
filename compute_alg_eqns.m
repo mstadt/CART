@@ -20,7 +20,7 @@ CARTe_PB = y(:,1); % CARTe in blood
 CARTm_PB = y(:,2); % CARTm in blood
 CARTe_T  = y(:,3); % CARTe in tissue
 CARTm_T  = y(:,4); % CARTm in tissue
-Cplx     = y(:,5); % CAR-Target complexes
+Cplx_T     = y(:,5); % CAR-Target complexes
 Tumor    = y(:,6); % tumor size
 
 CARTe_T2PB =K21.*Vt.*CARTe_T;
@@ -31,16 +31,19 @@ CARTm_T2PB = K21*Vt*CARTm_T;
 CARTm_PB2T = K12*Vb*CARTm_PB;
 CARTm_PB_deg = Kel_m*CARTm_PB;
 
-CplxCART = Cplx ./ (CARTe_T + CARTm_T);
+CplxCART = Cplx_T ./ (CARTe_T + CARTm_T);
 Kexp = (Kexp_max * CplxCART) ./ (EC50_exp + CplxCART);
 
 CARTe_exp = Kexp .* CARTe_T; % CART cell expansion
 CARTe2CARTm = Rm .* CARTe_T; % conversion from effector to memory T-cells
 
-f_CART = (CARTe_T + CARTm_T) * Ag_CAR - Cplx;
-f_Ag   = Tumor * Ag_TAA - Cplx;
+f_CART = (CARTe_T + CARTm_T) * Ag_CAR - Cplx_T;
+f_Ag   = Tumor * Ag_TAA - Cplx_T;
+Cplx_Inc = Kon_CAR .* f_CART .* f_Ag;
+Cplx_Dec = Koff_CAR .* Cplx_T;
 
-CplxTumor = Cplx./Tumor;
+
+CplxTumor = Cplx_T./Tumor;
 Kkill = (Kkill_max .* CplxTumor) ./ (KC50_Kill + CplxTumor);
 
-CellsKill = Kkill .* CARTe_T .* Tumor;
+CellsKill = Kkill .* Tumor;

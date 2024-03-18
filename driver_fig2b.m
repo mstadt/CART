@@ -3,13 +3,9 @@ clear all;
 
 %% set parameters
 p = set_params('PKPD_preclin');
-pclin = set_params('PKPD_clin');
 % change params here (option)
-p = pclin;
-p.Kg_tumor = 0.1; %0.2; %0.088;
-% p.K12 = pclin.K12;
-% p.Kexp_max = pclin.Kexp_max;
-% p.EC50_exp = pclin.EC50_exp;
+p.Kg_tumor = 0.1;
+p.Rm = 2e-2;
 
 
 [params, ~] = pars2vector(p, 0);
@@ -56,7 +52,7 @@ fprintf('making figs \n')
 % figure specs
 lw = 4;
 f.xlab = 16; f.ylab = 16; f.title = 18;
-f.leg = 16; f.gca = 18;
+f.leg = 16; f.gca = 12;
 cmap = parula(6);
 c1 = cmap(2,:);
 c2 = cmap(5,:);
@@ -76,12 +72,12 @@ clf;
 subplot(nr,nc,1)
 hold on
 plot(t_veh,y_veh(:,1),'linewidth',lw,'color',c1)
-plot(t_treat,y_treat(:,1),'linewidth',lw,'color',c2)
+plot(t_treat,max(1e-5,y_treat(:,1)),'linewidth',lw,'color',c2)
 xlabel('t')
 ylabel('CARTe_{PB}')
 legend(labs)
-ymax = max([1;y_veh(:,1);y_treat(:,1)]);
-ylim([0, ymax])
+ylim([10^0, 10^8])
+yticks([10^0, 10^2, 10^4, 10^6, 10^8])
 set(gca,'fontsize',f.gca,'Yscale','log')
 grid on
 hold off
@@ -93,8 +89,9 @@ plot(t_treat,y_treat(:,2),'linewidth',lw,'color',c2)
 xlabel('t')
 ylabel('CARTm_{PB}')
 legend(labs)
-ymax = max([1;y_veh(:,2);y_treat(:,2)]);
-ylim([0, ymax])
+%ymax = max([1;y_veh(:,2);y_treat(:,2)]);
+ylim([10^0, 10^8])
+yticks([10^0, 10^2, 10^4, 10^6, 10^8])
 set(gca,'fontsize',f.gca,'Yscale','log')
 grid on
 hold off
@@ -106,8 +103,8 @@ plot(t_treat,y_treat(:,3),'linewidth',lw,'color',c2)
 xlabel('t')
 ylabel('CARTe_{T}')
 legend(labs)
-ymax = max([1;y_veh(:,3);y_treat(:,3)]);
-ylim([0, ymax])
+ylim([10^0, 10^8])
+yticks([10^0, 10^2, 10^4, 10^6, 10^8])
 set(gca,'fontsize',f.gca,'Yscale','log')
 grid on
 hold off
@@ -119,8 +116,9 @@ plot(t_treat,y_treat(:,4),'linewidth',lw,'color',c2)
 xlabel('t')
 ylabel('CARTm_{T}')
 legend(labs)
-ymax = max([1;y_veh(:,4);y_treat(:,4)]);
-ylim([0, ymax])
+%ymax = max([1;y_veh(:,4);y_treat(:,4)]);
+ylim([10^0, 10^8])
+yticks([10^0, 10^2, 10^4, 10^6, 10^8])
 set(gca,'fontsize',f.gca,'Yscale','log')
 grid on
 hold off
@@ -132,8 +130,8 @@ plot(t_treat,y_treat(:,5),'linewidth',lw,'color',c2)
 xlabel('t')
 ylabel('Cplx')
 legend(labs)
-ymax = max([1;y_veh(:,5);y_treat(:,5)]);
-ylim([0, ymax])
+%ymax = max([1;y_veh(:,5);y_treat(:,5)]);
+%ylim([0, ymax])
 set(gca,'fontsize',f.gca)
 grid on
 hold off
