@@ -4,31 +4,13 @@ clear all;
 %% set parameters
 p = set_params('PKPD_preclin');
 % change params here (option)
-p.Kexp_max = 2*0.612; %1.282*0.612;
-%p.EC50_exp
-p.Rm = 0.5; %0.2; %5e-2; %2.5e-2; %0.2;
-%p.Kel_e
-p.Kel_m = 0.1; % because there is no value there....
-%p.Kkill_max
-p.K12 = 1.71; %20304 * (1-.209); % blood to tumor
-p.K21 = 0.176; %0.3288*(1 + 0.28); % tumor to blood
-p.Kg_tumor = 0.1;
+p.Kg_tumor = 0.105;
 
 % density_CAR
 p.Ag_CAR = 20000; % option in code
-p.Kon_CAR = 2e-14;
 
+p.Rm = 2e-2; %2e-2; %2e-2; %2e-2; 
 
-%%%%%% old changes
-% p.Kg_tumor = 0.1;
-% p.K12 = 500; % PB 2 Tumor rate
-% %p.K21 = 0.5; % T 2 PB rate
-% p.Rm = 2e-3; %0.02;
-% p.EC50_exp = 0.5;
-% p.Kexp_max = 4; %3; %1.5;
-% p.KC50_Kill = 2.1;
-% p.Kkill_max = 0.7;
-%p.Kon_CAR = p.Kon_CAR * 10;
 
 
 [params, ~] = pars2vector(p, 0);
@@ -39,7 +21,7 @@ CARTm_PB0 = 0; % CARTm in blood
 CARTe_T0  = 0; % CARTe in tissue, seems to need to be nonzero to prevent numerical issues....
 CARTm_T0  = 0; % CARTm in tissue
 Cplx0     = 0; % CAR-Target Complexes
-Tumor0    = 1e5; % tumor size
+Tumor0    = 2.5e9; %6e7; %1e5; % tumor size
 
 IC = [CARTe_PB0;CARTm_PB0;CARTe_T0;CARTm_T0;Cplx0;Tumor0];
 
@@ -51,7 +33,7 @@ tspan_veh = [t0,tf_veh];
 tspan_treat = [t0;tf_treat];
 
 %% CART dose
-doseCART_tot = 50e6; % total number of cells in dose
+doseCART_tot = 5e6; % total number of cells in dose
 
 
 %% ODE settings
@@ -189,7 +171,7 @@ plot(dat.datTV_veh(:,1), dat.datTV_veh(:,2),...
                 'color', c1,'markerfacecolor', c1, ...
                 'HandleVisibility', 'off')
 
-TC2Vol = 100/1e5; % cells 2 volume conversion
+TC2Vol =100/Tumor0; % cells 2 volume conversion
 plot(t_veh,y_veh(:,6)*TC2Vol,'linewidth',lw,'color',c1)
 % treatment
 plot(dat.datTV_treat(:,1), dat.datTV_treat(:,2),...
@@ -198,7 +180,7 @@ plot(dat.datTV_treat(:,1), dat.datTV_treat(:,2),...
                 'color', c2,'markerfacecolor', c2, ...
                 'HandleVisibility', 'off')
 plot(t_treat,y_treat(:,6)*TC2Vol,'linewidth',lw,'color',c2)
-legend(labs)
+legend(labs,'fontsize',18)
 xlabel('Time (day)')
 ylabel('Tumor volume (mm^3)')
 ylim([0,4000])
@@ -227,61 +209,60 @@ plot(dat.datCART_treat(:,1), dat.datCART_treat(:,2),...
 cf = 1e-3;
 CART_PB_tot = (y_treat(:,1) + y_treat(:,2))*cf; %(p.Vb * 1000); % # cell/muL
 plot(t_treat,CART_PB_tot,'linewidth',lw,'color',c2)
-legend(labs)
 xlabel('Time (day)')
 ylabel('CAR-T Cells in Blood (#/\muL)')
 set(gca,'fontsize',f.gca)
 xlim([0,40])
 ylim([0,1000])
+legend(labs,'fontsize',18)
 grid on
 hold off
 
 %% Plot dosing
 figure(3)
-ind = find(t_treat > 240/24, 1, 'first');
 nr = 2; nc = 2;
 subplot(nr,nc,1)
-plot(t_treat(1:ind) * 24, y_treat(1:ind, 1) * p.Vb,'linewidth',3, 'color',c2)
-xlabel('t (hrs)')
+plot(t_treat, y_treat(:, 1) * p.Vb,'linewidth',3, 'color',c2)
+xlabel('t (day)')
 ylabel('CARTe_{PB} (number of cells)')
 ylim([10^0,10^7])
 set(gca,'fontsize',f.gca, 'Yscale','log')
 grid on
 
 subplot(nr,nc,2)
-plot(t_treat(1:ind) * 24, y_treat(1:ind, 3) * p.Vt,'linewidth',3, 'color',c2)
-xlabel('t (hrs)')
+plot(t_treat, y_treat(:, 3) * p.Vt,'linewidth',3, 'color',c2)
+xlabel('t (day)')
 ylabel('CARTe_{T} (number of cells)')
-ylim([10^0,10^7])
+ylim([10^0,10^8])
 set(gca,'fontsize',f.gca, 'YScale','log')
 grid on
 
 subplot(nr,nc,3)
-plot(t_treat(1:ind) * 24, y_treat(1:ind, 2) * p.Vb,'linewidth',3, 'color',c2)
-xlabel('t (hrs)')
+plot(t_treat, y_treat(:, 2) * p.Vb,'linewidth',3, 'color',c2)
+xlabel('t (day)')
 ylabel('CARTm_{PB} (number of cells)')
 ylim([10^0,10^7])
 set(gca,'fontsize',f.gca, 'Yscale','log')
 grid on
 
 subplot(nr,nc,4)
-plot(t_treat(1:ind) * 24, y_treat(1:ind, 4) * p.Vt,'linewidth',3, 'color',c2)
-xlabel('t (hrs)')
+plot(t_treat, y_treat(:, 4) * p.Vt,'linewidth',3, 'color',c2)
+xlabel('t (day)')
 ylabel('CARTm_{T} (number of cells)')
-ylim([10^0,10^7])
+ylim([10^0,10^8])
 set(gca,'fontsize',f.gca, 'YScale','log')
 grid on
 
 
+%% Cplx
+figure(4)
+plot(t_treat*24, y_treat(:,5), 'linewidth', 3, 'color', c2)
+xlabel('t (day)')
+ylabel('Cplx')
+set(gca,'fontsize',f.gca)
+grid on
 
-%% save simulations options
-% save_sim = input('Do you want to save the simulation? (0 - no/1 - yes) ');
-% if save_sim
-%     notes = input('notes: ');
-%     fname = strcat('./simPD/', date, '_driver_PD', ...
-%                     '_notes-', notes, ...
-%                     '.mat');
-%     save(fname)
-%     fprintf('results saved to: \n %s \n', fname)
-% end
 
+y=y_treat;
+t = t_treat;
+run('compute_alg_eqns.m')

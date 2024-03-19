@@ -27,15 +27,6 @@ Kon_CAR = params(14);
 Koff_CAR = params(15);
 Kg_tumor = params(16);
 
-%% get variable inputs
-% doseCART = 0; % default no treatment
-% for ii = 1:2:length(varargin)
-%     temp = varargin{ii+1};
-%     if strcmp(varargin{ii},'doseCART')
-%         doseCART = temp;
-%     end
-% end
-
 %% model equations
 dydt = zeros(length(y),1);
 
@@ -64,7 +55,7 @@ end
 % d(CARTe_T)/dt
 CARTe_exp = Kexp * CARTe_T; % CART cell expansion
 CARTe2CARTm = Rm * CARTe_T; % conversion from effector to memory T-cells
-dydt(3) = (CARTe_PB2T - CARTe_T2PB)./Vt + CARTe_exp./Vt - CARTe2CARTm;
+dydt(3) = (CARTe_PB2T - CARTe_T2PB)./Vt + CARTe_exp - CARTe2CARTm;
 
 % d(CARTm_T)/dt
 dydt(4) = (CARTm_PB2T - CARTm_T2PB)./Vt + CARTe2CARTm;

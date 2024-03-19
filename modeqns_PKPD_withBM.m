@@ -2,12 +2,12 @@ function dydt = modeqns_PKPD_withBM(t,y,params,varargin)
 % PKPD model equations
 
 %% variable names
-CARTe_PB = y(1); % CARTe in blood
-CARTm_PB = y(2); % CARTm in blood
-CARTe_T  = y(3); % CARTe in tissue
-CARTm_T  = y(4); % CARTm in tissue
+CARTe_PB   = y(1); % CARTe in blood
+CARTm_PB   = y(2); % CARTm in blood
+CARTe_T    = y(3); % CARTe in tissue
+CARTm_T    = y(4); % CARTm in tissue
 Cplx_T     = y(5); % CAR-Target complexes
-Tumor    = y(6); % tumor size
+Tumor_T    = y(6); % tumor size
 M = y(7);
 B = y(8);
 
@@ -19,14 +19,14 @@ Vt = params(4);
 Kel_e = params(5);
 Kel_m = params(6);
 Kexp_max = params(7);
-EC50_exp = params(8);
+EC50 = params(8);
 Rm = params(9);
 Ag_CAR = params(10);
 Ag_TAA = params(11);
 Kkill_max = params(12);
-KC50_Kill = params(13);
-Kon_CAR = params(14);
-Koff_CAR = params(15);
+IC50 = params(13);
+Kon = params(14);
+Koff = params(15);
 Kg_tumor = params(16);
 Pm = params(17);
 gamma_m = params(18);
@@ -37,16 +37,6 @@ Kb = params(22);
 Tumor0 = params(23);
 M0 = params(24);
 B0 = params(25);
-
-
-%% get variable inputs
-% doseCART = 0; % default no treatment
-% for ii = 1:2:length(varargin)
-%     temp = varargin{ii+1};
-%     if strcmp(varargin{ii},'doseCART')
-%         doseCART = temp;
-%     end
-% end
 
 %% model equations
 dydt = zeros(length(y),1);
@@ -62,42 +52,37 @@ dydt(1) = (CARTe_T2PB - CARTe_PB2T)./Vb - CARTe_PB_deg;
 CARTm_T2PB = K21*Vt*CARTm_T; % CARTm cell T to PB compartment
 CARTm_PB2T = K12*Vb*CARTm_PB; % CARTm cell PB to T compartment
 CARTm_PB_deg = Kel_m*CARTm_PB; % degradation of CARTm in PB
-dydt(2) = (CARTm_T2PB - CARTm_PB2T)./Vb  - CARTm_PB_deg;
+dydt(2) = (CARTm_T2PB - CARTm_PB2T)./Vb - CARTm_PB_deg;
 
 %% Tissue compartment (bone marrow or solid tumor)
+Density_CAR = Ag_CAR;
+Density_TAA = Ag_TAA;
+CAR_T = (CARTe_T+ CARTm_T) * Density_CAR - Cplx_T;  
+TAA_T = Tumor_T * Density_TAA - Cplx_T;
+CplxPTumor_T= Cplx_T / Tumor_T;
 if (CARTe_T + CARTm_T) > 0
-    CplxPCART_T = Cplx_T / (CARTe_T + CARTm_T);  
-    % CAR-T cell expansion
-    Kexp = (Kexp_max * CplxPCART_T) ./ (EC50_exp + CplxPCART_T);
+    CplxPCART_T= Cplx_T / (CARTe_T + CARTm_T);
 else
-    Kexp = 0;
-end
+    CplxPCART_T= Cplx_T / (1e-6 + CARTm_T);
+end 
 
-% d(CARTe_T)/dt
-CARTe_exp = Kexp * CARTe_T; % CART cell expansion
-CARTe2CARTm = Rm * CARTe_T; % conversion from effector to memory T-cells
-dydt(3) = (CARTe_PB2T - CARTe_T2PB)./Vt + CARTe_exp - CARTe2CARTm;
+% CARTe_T
+Kexp = (Kexp_max* CplxPCART_T/ (EC50 + CplxPCART_T));
+dydt(3) = (CARTe_PB2T - CARTe_T2PB)/Vt + Kexp * CARTe_T - Rm*CARTe_T;
 
 % d(CARTm_T)/dt
-dydt(4) = (CARTm_PB2T - CARTm_T2PB)./Vt + CARTe2CARTm;
+dydt(4) = (CARTm_PB2T - CARTm_T2PB)./Vt + Rm*CARTe_T;
 
-% Cplx_T
-f_CART = (CARTe_T + CARTm_T) * Ag_CAR - Cplx_T;
-f_Ag   = Tumor * Ag_TAA - Cplx_T;
-% d(Cplx)/dt
-dydt(5) = Kon_CAR * f_CART * f_Ag - Koff_CAR * Cplx_T;
-
-%% Tumor
-CplxTumor = Cplx_T./Tumor;
-Kkill = (Kkill_max * CplxTumor) / (KC50_Kill + CplxTumor);
+% d(Cplx_T)/dt
+dydt(5) = Kon * CAR_T * TAA_T - Koff * Cplx_T; 
 
 % d(Tumor)/dt
-dydt(6) = Kg_tumor * Tumor - Kkill * Tumor;
+dydt(6) = Kg_tumor * Tumor_T - (Kkill_max * (CplxPTumor_T) / (IC50 + (CplxPTumor_T))) * Tumor_T;
 
 % dM/dt
-dydt(7) = Pm*(Tumor/Tumor0).^gamma_m - Km*M;
-
+dydt(7) = Pm*(Tumor_T/Tumor0).^gamma_m - Km*M;
+% 
 % dBdt
-dydt(8) = Pb*(Tumor/Tumor0).^gamma_b - Kb*B;
+dydt(8) = Pb*(Tumor_T/Tumor0).^gamma_b - Kb*B;
 
 end % end modeqns
