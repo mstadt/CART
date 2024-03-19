@@ -18,9 +18,9 @@ Kg_tumor = params(16);
 
 CARTe_PB = y(:,1); % CARTe in blood
 CARTm_PB = y(:,2); % CARTm in blood
-CARTe_T  = y(:,3); % CARTe in tissue
-CARTm_T  = y(:,4); % CARTm in tissue
-Cplx_T     = y(:,5); % CAR-Target complexes
+CARTe_T  = y(:,3); % CAR-Target complexes
+CARTm_T  = y(:,4); % CARTm in tumor
+Cplx_T  = y(:,5); % CARTm in tumor
 Tumor    = y(:,6); % tumor size
 
 CARTe_T2PB =K21.*Vt.*CARTe_T;

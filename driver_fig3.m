@@ -10,7 +10,7 @@ CARTm_PB0 = 0; % CARTm in blood
 CARTe_T0  = 0; % CARTe in tissue
 CARTm_T0  = 0; % CARTm in tissue
 Cplx0     = 0; % CAR-Target Complexes
-Tumor0    = 1e5; % tumor size
+Tumor0    = 2.5e9; %1e5; % tumor size
 
 IC = [CARTe_PB0;CARTm_PB0;CARTe_T0;CARTm_T0;Cplx0;Tumor0];
 
