@@ -31,8 +31,9 @@ CARTm_T2PB = K21*Vt*CARTm_T;
 CARTm_PB2T = K12*Vb*CARTm_PB;
 CARTm_PB_deg = Kel_m*CARTm_PB;
 
-CplxCART = Cplx_T ./ (CARTe_T + CARTm_T);
-Kexp = (Kexp_max * CplxCART) ./ (EC50_exp + CplxCART);
+CplxPCART_T = Cplx_T ./ (CARTe_T + CARTm_T);
+frac_Kexp = CplxPCART_T ./ (EC50_exp + CplxPCART_T);
+Kexp = (Kexp_max .* CplxPCART_T) ./ (EC50_exp + CplxPCART_T);
 
 CARTe_exp = Kexp .* CARTe_T; % CART cell expansion
 CARTe2CARTm = Rm .* CARTe_T; % conversion from effector to memory T-cells
@@ -44,6 +45,7 @@ Cplx_Dec = Koff_CAR .* Cplx_T;
 
 
 CplxTumor = Cplx_T./Tumor;
+frac_Kkill = CplxTumor ./ (KC50_Kill + CplxTumor);
 Kkill = (Kkill_max .* CplxTumor) ./ (KC50_Kill + CplxTumor);
 
 CellsKill = Kkill .* Tumor;

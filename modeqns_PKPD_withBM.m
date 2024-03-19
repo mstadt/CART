@@ -1,4 +1,4 @@
-function dydt = modeqns_PKPD(t,y,params,varargin)
+function dydt = modeqns_PKPD_withBM(t,y,params,varargin)
 % PKPD model equations
 
 %% variable names
@@ -8,6 +8,8 @@ CARTe_T  = y(3); % CARTe in tissue
 CARTm_T  = y(4); % CARTm in tissue
 Cplx_T     = y(5); % CAR-Target complexes
 Tumor    = y(6); % tumor size
+M = y(7);
+B = y(8);
 
 %% set parameter names
 K12 = params(1);
@@ -26,6 +28,16 @@ KC50_Kill = params(13);
 Kon_CAR = params(14);
 Koff_CAR = params(15);
 Kg_tumor = params(16);
+Pm = params(17);
+gamma_m = params(18);
+Km = params(19);
+Pb = params(20);
+gamma_b = params(21);
+Kb = params(22);
+Tumor0 = params(23);
+M0 = params(24);
+B0 = params(25);
+
 
 %% get variable inputs
 % doseCART = 0; % default no treatment
@@ -64,7 +76,7 @@ end
 % d(CARTe_T)/dt
 CARTe_exp = Kexp * CARTe_T; % CART cell expansion
 CARTe2CARTm = Rm * CARTe_T; % conversion from effector to memory T-cells
-dydt(3) = (CARTe_PB2T - CARTe_T2PB)./Vt + CARTe_exp./Vt - CARTe2CARTm;
+dydt(3) = (CARTe_PB2T - CARTe_T2PB)./Vt + CARTe_exp - CARTe2CARTm;
 
 % d(CARTm_T)/dt
 dydt(4) = (CARTm_PB2T - CARTm_T2PB)./Vt + CARTe2CARTm;
@@ -82,5 +94,10 @@ Kkill = (Kkill_max * CplxTumor) / (KC50_Kill + CplxTumor);
 % d(Tumor)/dt
 dydt(6) = Kg_tumor * Tumor - Kkill * Tumor;
 
+% dM/dt
+dydt(7) = Pm*(Tumor/Tumor0).^gamma_m - Km*M;
+
+% dBdt
+dydt(8) = Pb*(Tumor/Tumor0).^gamma_b - Kb*B;
 
 end % end modeqns
