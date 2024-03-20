@@ -24,9 +24,8 @@ p.Tumor0 = Tumor0;
 p.M0 = M0;
 p.B0 = B0;
 % change params here
-p.Kel_m = 250*p.Kel_m; %500*p.Kel_m;
-p.Kel_e = 250*p.Kel_e; %500*p.Kel_e;
-p.Kkill_max = 0.06*p.Kkill_max; %0.05*p.Kkill_max; %0.1*p.Kkill_max; %0.175*p.Kkill_max; %1e-1*p.Kkill_max;
+
+%p.Kkill_max = 0.05*p.Kkill_max; %0.1*p.Kkill_max; %0.06*p.Kkill_max;
 
 [params, ~] = pars2vector(p, 0);
 
@@ -37,7 +36,7 @@ tf = 360;
 tspan = [t0,tf];
 
 %% CART dose
-doseCART_tot = 50e6; %800e6; %500e6; %; % total number of cells in dose
+doseCART_tot = 50e6; %150e6; %450e6; %800e6; %450e6; %150e6;%50e6; %; % total number of cells in dose
 
 %% ODE settings
 options = odeset('RelTol',1.0e-12,'AbsTol',1e-12); % ode solver settings
@@ -134,13 +133,13 @@ CARTe_PB = y_treat(:,1);
 CARTm_PB = y_treat(:,2);
 FinalCARTPB = TransC * (CARTe_PB + CARTm_PB);
 figure(3)
-%clf
+clf
 plot(t_treat, FinalCARTPB, 'linewidth',lw)
 %plot(t_treat, FinalCARTPB, 'linewidth',lw,'color',c2)
 xlabel('t (days)')
 ylabel('Transgene copies/\mu g genomic DNA')
-xlim([0,70])
-ylim([10^1, 10^7])
+xlim([0,350])
+ylim([10^-5, 10^7])
 set(gca,'fontsize',f.gca, 'Yscale', 'log')
 grid on
 
@@ -186,19 +185,18 @@ xlim([0,60])
 set(gca,'fontsize',f.gca)
 grid on
 
-
-
-%% save simulations options
-% save_sim = input('Do you want to save the simulation? (0 - no/1 - yes) ');
-% if save_sim
-%     notes = input('notes: ');
-%     fname = strcat('./simPD/', date, '_driver_PD', ...
-%                     '_notes-', notes, ...
-%                     '.mat');
-%     save(fname)
-%     fprintf('results saved to: \n %s \n', fname)
-% end
-
 y=y_treat;
 t=t_treat;
 run('compute_alg_eqns.m')
+
+%% save simulations options
+save_sim = input('Do you want to save the simulation? (0 - no/1 - yes) ');
+if save_sim
+    notes = input('notes: ');
+    fname = strcat('./simPKPD/', date, '_driver_fig3_fromcode', ...
+                    '_dose-', num2str(doseCART_tot),...
+                    '_notes-', notes, ...
+                    '.mat');
+    save(fname)
+    fprintf('results saved to: \n %s \n', fname)
+end

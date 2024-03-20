@@ -63,7 +63,7 @@ CplxPTumor_T= Cplx_T / Tumor_T;
 if (CARTe_T + CARTm_T) > 0
     CplxPCART_T= Cplx_T / (CARTe_T + CARTm_T);
 else
-    CplxPCART_T= Cplx_T / (1e-6 + CARTm_T);
+    CplxPCART_T= 0; %Cplx_T / (1e-6 + CARTm_T);
 end 
 
 % CARTe_T

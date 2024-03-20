@@ -45,7 +45,7 @@ fprintf('vehicle simulation \n')
 [t_veh, y_veh] = ode15s(@(t,y) modeqns_PKPD(t,y,params),...
                                     tspan_veh, IC, options);
 fprintf('treatment simulation \n')
-IC(1) = doseCART_tot; % add dose
+IC(1) = doseCART_tot/p.Vb; % add dose/L
 [t_treat, y_treat] = ode15s(@(t,y) modeqns_PKPD(t,y,params),...
                                     tspan_treat, IC, options);
 % [t_treat,y_treat] = run_dose_sim(doseCART_tot, dose_start,dose_time_hrs,...
@@ -59,8 +59,8 @@ lw = 4;
 f.xlab = 16; f.ylab = 16; f.title = 18;
 f.leg = 16; f.gca = 12;
 cmap = parula(6);
-c1 = cmap(2,:);
-c2 = cmap(5,:);
+c1 = cmap(1,:);
+c2 = cmap(4,:);
 ls1 = '-'; ls2 = '-';
 cgraymap = gray(5);
 cgray = cgraymap(3,:);
@@ -218,40 +218,47 @@ legend(labs,'fontsize',18)
 grid on
 hold off
 
+AddLetters2Plots(figure(2),{'A','B'},'HShift', -0.06, 'VShift', -0.06, ...
+                'fontsize', 22)
+
 %% Plot dosing
 figure(3)
+lw = 4;
 nr = 2; nc = 2;
 subplot(nr,nc,1)
-plot(t_treat, y_treat(:, 1) * p.Vb,'linewidth',3, 'color',c2)
+plot(t_treat, y_treat(:, 1) * p.Vb,'linewidth',lw, 'color',c2)
 xlabel('t (day)')
 ylabel('CARTe_{PB} (number of cells)')
-ylim([10^0,10^7])
+ylim([10^0,10^11])
 set(gca,'fontsize',f.gca, 'Yscale','log')
 grid on
 
 subplot(nr,nc,2)
-plot(t_treat, y_treat(:, 3) * p.Vt,'linewidth',3, 'color',c2)
+plot(t_treat, y_treat(:, 3) * p.Vt,'linewidth',lw, 'color',c2)
 xlabel('t (day)')
 ylabel('CARTe_{T} (number of cells)')
-ylim([10^0,10^8])
+ylim([10^0,10^11])
 set(gca,'fontsize',f.gca, 'YScale','log')
 grid on
 
 subplot(nr,nc,3)
-plot(t_treat, y_treat(:, 2) * p.Vb,'linewidth',3, 'color',c2)
+plot(t_treat, y_treat(:, 2) * p.Vb,'linewidth',lw, 'color',c2)
 xlabel('t (day)')
 ylabel('CARTm_{PB} (number of cells)')
-ylim([10^0,10^7])
+ylim([10^0,10^11])
 set(gca,'fontsize',f.gca, 'Yscale','log')
 grid on
 
 subplot(nr,nc,4)
-plot(t_treat, y_treat(:, 4) * p.Vt,'linewidth',3, 'color',c2)
+plot(t_treat, y_treat(:, 4) * p.Vt,'linewidth',lw, 'color',c2)
 xlabel('t (day)')
 ylabel('CARTm_{T} (number of cells)')
-ylim([10^0,10^8])
+ylim([10^0,10^11])
 set(gca,'fontsize',f.gca, 'YScale','log')
 grid on
+
+AddLetters2Plots(figure(3),{'A','B','C','D'},'HShift', -0.06, 'VShift', -0.06, ...
+                'fontsize', 22)
 
 
 %% Cplx
